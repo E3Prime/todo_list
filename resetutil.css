@@ -1,0 +1,76 @@
+/* ANCHOR Config */
+:root {
+  color-scheme: light dark;
+}
+
+/* ANCHOR Resets */
+/* #region */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-decoration: none;
+  font: inherit;
+}
+
+body {
+  overscroll-behavior: none;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background-color: light-dark(#fff, #333);
+}
+
+main {
+  flex: 1;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+a {
+  color: inherit;
+}
+
+p,
+li,
+figcaption {
+  max-width: 63ch;
+  margin-bottom: 1.5rem;
+  text-wrap: pretty;
+}
+/* #endregion */
+
+/* ANCHOR Utilities */
+/* #region */
+
+.fade-in {
+  opacity: 1;
+
+  @starting-style {
+    opacity: 0;
+  }
+}
+
+.fade-out {
+  opacity: 0;
+}
+
+/* #endregion */
