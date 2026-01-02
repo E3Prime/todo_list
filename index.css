@@ -87,6 +87,7 @@ hr {
       border-bottom: 2px solid #612fd5;
       margin-bottom: 1rem;
       padding-bottom: 0.7rem;
+      transition: opacity 1s linear;
 
       button:last-of-type {
         margin-left: auto;
@@ -111,5 +112,11 @@ hr {
         aspect-ratio: 1 / 1;
       }
     }
+  }
+}
+
+@media (width >= 567px) {
+  .todo-wrapper {
+    aspect-ratio: 16 / 13;
   }
 }
