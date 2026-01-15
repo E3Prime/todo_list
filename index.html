@@ -14,22 +14,58 @@
   </head>
   <body>
     <main>
-      <section class="todo-wrapper">
-        <div class="todo-title">
-          <img src="imgs/star.svg" alt="Star Icon" />
+      <section class="todo-list-wrapper">
+        <div class="todo-list-title">
+          <img class="star-icon" src="images/star.svg" alt="Star Icon" />
           <h1>Galaxy Tasks</h1>
-          <img src="imgs/star.svg" alt="Star Icon" />
-        </div>
-        <hr />
-        <div class="todo-creation">
-          <h2>Create Task</h2>
-          <div>
-            <input placeholder="Create task..." maxlength="25" />
-            <button type="button" id="createTodo">Create</button>
-          </div>
+          <img class="star-icon" src="images/star.svg" alt="Star Icon" />
         </div>
         <hr />
         <div class="todo-list" id="todoList"></div>
+        <hr />
+        <div class="open-todo-form">
+          <h4>Create Task</h4>
+          <button class="open-todo-form-btn" type="button" id="openTodoForm">
+            <img class="plus-icon" src="images/plus.svg" alt="Add Icon" />
+          </button>
+        </div>
+        <div class="todo-form-wrapper" id="todoFormWrapper">
+          <form class="todo-form" id="todoForm">
+            <div class="todo-form-title">
+              <img class="star-icon" src="images/star.svg" alt="Star Icon" />
+              <h2 id="formTitle">Add New Task</h2>
+              <img class="star-icon" src="images/star.svg" alt="Star Icon" />
+            </div>
+            <div class="todo-title">
+              <label for="todoTitle">Title</label>
+              <input type="text" id="todoTitle" placeholder="Task Name" maxlength="40" required />
+            </div>
+            <div class="todo-priority">
+              <label for="priority">Priority</label>
+              <select name="priority" id="priority">
+                <option value="none" selected disabled>Select priority</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+              <p class="error-priority">You must select a priority!</p>
+            </div>
+            <div class="todo-status">
+              <label for="status">Status</label>
+              <select name="status" id="status">
+                <option value="none" selected disabled>Todo, In Progress</option>
+                <option value="pending">Todo</option>
+                <option value="in progress">In Progress</option>
+              </select>
+              <p class="error-status">You must select a status!</p>
+            </div>
+            <div class="form-btn">
+              <button type="button" id="closeTodoForm">Cancel</button>
+              <button id="createTask">Create Task</button>
+              <button type="button" id="updateTask" hidden>Update Task</button>
+            </div>
+          </form>
+        </div>
       </section>
     </main>
   </body>

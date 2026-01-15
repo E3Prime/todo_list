@@ -1,31 +1,20 @@
-/* ANCHOR Config */
-:root {
-  color-scheme: light dark;
-}
-
 /* ANCHOR Resets */
-/* #region */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  list-style: none;
-  text-decoration: none;
-  font: inherit;
 }
 
 body {
-  overscroll-behavior: none;
   min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  background-color: light-dark(#fff, #333);
-}
-
-main {
-  flex: 1;
+  display: grid;
+  /* Uncomment if using header & footer */
+  /* grid-template-rows: auto 1fr auto; */
+  font-family: system-ui, Arial;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
 }
 
 img,
@@ -49,18 +38,25 @@ a {
   color: inherit;
 }
 
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
 p,
 li,
 figcaption {
   max-width: 63ch;
-  margin-bottom: 1.5rem;
   text-wrap: pretty;
 }
-/* #endregion */
 
 /* ANCHOR Utilities */
-/* #region */
-
 .fade-in {
   opacity: 1;
 
@@ -72,5 +68,3 @@ figcaption {
 .fade-out {
   opacity: 0;
 }
-
-/* #endregion */
