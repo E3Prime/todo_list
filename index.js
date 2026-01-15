@@ -62,6 +62,9 @@ function performAction(e) {
 /** @param {SubmitEvent} e */
 function createTodo(e) {
   e.preventDefault();
+  // NOTE Use this to determine which button was used to submit the form
+  const btnAction = e.submitter;
+  console.log(btnAction);
   const form = /** @type {HTMLFormElement} */ (e.target);
   const priorityError = /** @type {HTMLParagraphElement} */ (todoForm.querySelector('.error-priority'));
   const statusError = /** @type {HTMLParagraphElement} */ (todoForm.querySelector('.error-status'));
