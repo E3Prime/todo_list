@@ -1,6 +1,5 @@
 /**
  * @typedef {object} Todo
- * @property {number} id - Unique identifier of the todo item.
  * @property {string} title - The title of the todo item.
  * @property {string} priority - Priority indicator of the todo item.
  * @property {string} status - Completion status of the todo item.
@@ -28,13 +27,10 @@ const updateTaskBtn = /** @type {HTMLButtonElement} */ (todoForm.querySelector('
 const formTitle = /** @type {HTMLElement} */ (todoForm.querySelector('#formTitle'));
 
 /** @type {Todo[]} */
-const todos = [
-  {id: 1, title: 'Woah Hey', priority: 'medium', status: 'pending'},
-  {id: 2, title: 'Best Buy Card', priority: 'high', status: 'in progress'},
-];
-let idCounter = 0;
-/** @type {number} */
+const todos = [];
 let activeTodoId = 0;
+
+getTodos();
 renderTodos();
 
 todoList.addEventListener('click', performAction);
@@ -47,24 +43,26 @@ closeTodoFormBtn.addEventListener('click', () => {
     updateTaskBtn.setAttribute('hidden', '');
   }
 });
-todoForm.addEventListener('submit', createTodo);
-updateTaskBtn.addEventListener('submit', updateTodo);
+todoForm.addEventListener('submit', formAction);
 
 /** @param {PointerEvent} e */
-function performAction(e) {
+async function performAction(e) {
   const target = e.target;
   if (!(target instanceof HTMLButtonElement || target instanceof HTMLInputElement)) return;
 
   const todoElem = /** @type {HTMLElement} */ (target.parentElement?.parentElement);
-  if (target.id === 'update') updateTodoSetup(todoElem);
+
+  if (target instanceof HTMLInputElement && target.checked) {
+    const todoElem = /** @type {HTMLElement} */ (target.parentElement?.parentElement?.parentElement);
+    deleteTodo(todoElem);
+  } else if (target.id === 'update') updateTodoSetup(todoElem);
+  else if (target.id === 'delete') deleteTodo(todoElem);
 }
 
 /** @param {SubmitEvent} e */
-function createTodo(e) {
+function formAction(e) {
   e.preventDefault();
-  // NOTE Use this to determine which button was used to submit the form
-  const btnAction = e.submitter;
-  console.log(btnAction);
+  const formAction = e.submitter?.id;
   const form = /** @type {HTMLFormElement} */ (e.target);
   const priorityError = /** @type {HTMLParagraphElement} */ (todoForm.querySelector('.error-priority'));
   const statusError = /** @type {HTMLParagraphElement} */ (todoForm.querySelector('.error-status'));
@@ -74,41 +72,60 @@ function createTodo(e) {
     return;
   } else if (status.value === 'none') {
     statusError.style.visibility = 'visible';
+    return;
   }
   priorityError.style.visibility = 'hidden';
   statusError.style.visibility = 'hidden';
-  todos.push({id: idCounter, title: todoTitle.value, priority: priority.value, status: status.value});
-  ++idCounter;
+  formAction === 'createTask' ? createTodo(todoTitle, priority, status) : updateTodo(todoTitle, priority, status);
   todoFormWrapper.classList.remove('active');
   form.reset();
+  saveTodos();
   renderTodos();
 }
 
-/** @param {SubmitEvent} e */
-function updateTodo(e) {
-  e.preventDefault();
-  const form = /** @type {HTMLFormElement} */ (e.target);
-  const priorityError = /** @type {HTMLParagraphElement} */ (todoForm.querySelector('.error-priority'));
-  const statusError = /** @type {HTMLParagraphElement} */ (todoForm.querySelector('.error-status'));
-  const {todoTitle, priority, status} = /** @type {FormElements} */ (form.elements);
-  if (priority.value === 'none') {
-    priorityError.style.visibility = 'visible';
-    return;
-  } else if (status.value === 'none') {
-    statusError.style.visibility = 'visible';
-  }
-  priorityError.style.visibility = 'hidden';
-  statusError.style.visibility = 'hidden';
-  todos.splice(activeTodoId, 1, {id: activeTodoId, title: todoTitle.value, priority: priority.value, status: status.value});
-  todoFormWrapper.classList.remove('active');
-  form.reset();
+/**
+ * @param {HTMLInputElement} todoTitle
+ * @param {HTMLSelectElement} priority
+ * @param {HTMLSelectElement} status
+ */
+function createTodo(todoTitle, priority, status) {
+  todos.push({title: todoTitle.value, priority: priority.value, status: status.value});
+}
+
+function getTodos() {
+  const savedTodos = localStorage.getItem('todos');
+  if (!savedTodos) return;
+  const parsedTodos = /** @type {Todo[]} */ (JSON.parse(savedTodos));
+  parsedTodos.forEach((todo) => todos.push(todo));
+}
+
+/**
+ * @param {HTMLInputElement} todoTitle
+ * @param {HTMLSelectElement} priority
+ * @param {HTMLSelectElement} status
+ */
+function updateTodo(todoTitle, priority, status) {
+  todos.splice(activeTodoId, 1, {title: todoTitle.value, priority: priority.value, status: status.value});
+}
+
+/** @param {HTMLElement} todoElem */
+async function deleteTodo(todoElem) {
+  const todoId = Number(todoElem.id.slice(-1));
+  todoElem.classList.add('fade-out');
+  await sleep(1000);
+  todos.splice(todoId, 1);
+  saveTodos();
   renderTodos();
+}
+
+function saveTodos() {
+  localStorage.setItem('todos', JSON.stringify(todos));
 }
 
 /** @param {HTMLElement} todoElem */
 function updateTodoSetup(todoElem) {
   const todoId = Number(todoElem.id.slice(-1));
-  const todo = /** @type {Todo} */ (todos.find((t) => t.id === todoId));
+  const todo = /** @type {Todo} */ todos[todoId];
   todoFormWrapper.classList.add('active');
   const titleElem = /** @type {HTMLInputElement} */ (todoForm.querySelector('#todoTitle'));
   const priorityElem = /** @type {HTMLSelectElement} */ (todoForm.querySelector('#priority'));
@@ -126,7 +143,7 @@ function renderTodos() {
   if (todos.length === 0) {
     todoList.innerHTML = `
       <div style="height: 100%; align-content: center;">
-        <h4 style="text-align: center;">Currently there are no todos present, click create task to have one present</h4>
+        <h4 style="text-align: center;">Currently there are no todos present, create a task to have one present</h4>
       </div>
     `;
     return;
@@ -143,8 +160,12 @@ function renderTodos() {
       starImg = 'images/star-red.svg';
     }
     const todoStructure = `
-      <div class="todo" id="todo-${todo.id}">
+      <div class="todo" id="todo-${i}">
         <div class="todo-action-btns">
+          <div>
+            <label for="completeTask${i}">Complete Task</label>
+            <input type="checkbox" id="completeTask${i}" />
+          </div>
           <button type="button" id="update">
             <img src="images/pen.svg" alt="Update" />
           </button>
@@ -163,115 +184,3 @@ function renderTodos() {
     todoList.innerHTML += todoStructure;
   }
 }
-
-// const todoList = /** @type {HTMLElement} */ (document.getElementById('todoList'));
-// const createTodoBtn = /** @type {HTMLButtonElement} */ (document.getElementById('createTodo'));
-// /** @type {Todo[]} */
-// const todos = [];
-
-// /** @param {Event} e */
-// const performAction = (e) => {
-//   const target = e.target;
-//   if (!(target instanceof HTMLInputElement || target instanceof HTMLButtonElement)) return;
-
-//   const todoElem = /** @type {HTMLElement} */ (target.parentElement);
-//   const checkboxElem = /** @type {HTMLInputElement} */ (todoElem.children[3]);
-//   const checkboxElemId = Number(checkboxElem.id.slice(-1));
-//   const [action, indexStr] = target.id.split('-');
-//   const todoIndex = Number(indexStr);
-
-//   if (action === 'update') updateTodo(todoElem, todoIndex);
-//   else if (checkboxElem.checked || action === 'delete') deleteTodo(todoElem, checkboxElemId);
-// };
-
-// const createTodo = () => {
-//   const inputElem = /** @type {HTMLInputElement} */ (createTodoBtn.previousElementSibling);
-//   if (inputElem.value.replaceAll(' ', '').length < 2) return;
-//   todos.push({title: inputElem.value});
-//   inputElem.value = '';
-//   saveTodos(todos);
-//   renderTodos(todoList, todos);
-// };
-
-// const getTodos = () => {
-//   const savedTodos = localStorage.getItem('todos');
-//   if (!savedTodos) return;
-//   const parsedTodos = /** @type {Todo[]} */ (JSON.parse(savedTodos));
-//   parsedTodos.forEach((todo) => todos.push(todo));
-// };
-
-// /**
-//  * @param {HTMLElement} todoElem
-//  * @param {number} todoIndex
-//  */
-// const updateTodo = (todoElem, todoIndex) => {
-//   const [labelElem, checkboxElem, inputElem] = /** @type {[HTMLLabelElement, HTMLInputElement, HTMLInputElement]} */ (Array.from(todoElem.children).slice(-3));
-//   const actionImg = /** @type {HTMLImageElement} */ (todoElem.children[1].firstElementChild);
-//   const action = /** @type {string} */ (actionImg.getAttribute('src')?.split('/').pop()?.split('.')[0]);
-
-//   if (action === 'pen') {
-//     labelElem.style.display = 'none';
-//     checkboxElem.style.display = 'none';
-//     actionImg.src = 'imgs/check.svg';
-//     inputElem.value = todos[todoIndex].title;
-//     inputElem.style.display = 'block';
-//     inputElem.focus();
-//   } else if (action === 'check') {
-//     todos.splice(todoIndex, 1, {title: inputElem.value});
-//     inputElem.value = '';
-//     inputElem.style.display = 'none';
-//     actionImg.src = 'imgs/pen.svg';
-//     checkboxElem.style.display = 'block';
-//     labelElem.style.display = 'block';
-//     labelElem.textContent = todos[todoIndex].title;
-//     saveTodos(todos);
-//   }
-// };
-
-// /**
-//  * @param {HTMLElement} todoElem
-//  * @param {number} todoIndex
-//  */
-// const deleteTodo = async (todoElem, todoIndex) => {
-//   todoElem.classList.add('fade-out');
-//   await sleep(1000);
-//   todos.splice(todoIndex, 1);
-//   saveTodos(todos);
-//   renderTodos(todoList, todos);
-// };
-
-// getTodos();
-// renderTodos(todoList, todos);
-// todoList.addEventListener('click', performAction);
-// createTodoBtn.addEventListener('click', createTodo);
-
-// /**
-//  * @param {HTMLElement} todoList
-//  * @param {Todo[]} todos
-//  */
-// function renderTodos(todoList, todos) {
-//   if (!todos) return;
-//   todoList.innerHTML = '';
-//   for (let i = 0; i < todos.length; ++i) {
-//     const todo = todos[i];
-//     const todoStructure = `
-//       <div class="todo" id="todo-${i}">
-//         <button type="button" id="delete-${i}">
-//           <img src="imgs/trash.svg" alt="Delete Todo" />
-//         </button>
-//         <button type="button" id="update-${i}">
-//           <img src="imgs/pen.svg" alt="Update Todo" />
-//         </button>
-//         <label for="todo-title-${i}">${todo.title}</label>
-//         <input type="checkbox" id="todo-title-${i}" name="todo-title-${i}" />
-//         <input type="text" hidden />
-//       </div>
-//     `;
-//     todoList.innerHTML += todoStructure;
-//   }
-// }
-
-// /** @param {Todo[]} todos */
-// function saveTodos(todos) {
-//   localStorage.setItem('todos', JSON.stringify(todos));
-// }

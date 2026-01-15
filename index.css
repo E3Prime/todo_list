@@ -55,12 +55,32 @@ hr {
     background-position: center;
     background-color: rgb(0 0 0 / 0.6);
     background-blend-mode: overlay;
+    max-width: 19rem;
     margin-top: 0.7rem;
     aspect-ratio: 3 / 2;
+    transition: opacity 1s ease-out;
 
     .todo-action-btns {
       display: flex;
-      justify-content: space-between;
+      gap: 0.4rem;
+
+      > :first-child {
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: center;
+        gap: 0.4rem;
+        margin-right: auto;
+
+        label {
+          font-size: 1.1rem;
+        }
+
+        input[type="checkbox"] {
+          height: 1.1em;
+          aspect-ratio: 1;
+          background: transparent;
+        }
+      }
 
       button {
         background: none;
@@ -232,12 +252,23 @@ hr {
     aspect-ratio: 5 / 4;
   }
 
+  .todo-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15em, 1fr));
+    gap: 1rem;
+  }
+
   .todo-form-wrapper {
+    position: fixed;
     top: 50%;
     left: 50%;
-    max-width: 30rem;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, 175%);
+    width: 30rem;
     aspect-ratio: 9 / 16;
+
+    &.active {
+      transform: translate(-50%, -50%);
+    }
   }
 
   .todo-form {
