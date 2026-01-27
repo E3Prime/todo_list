@@ -8,7 +8,7 @@ A space-themed task management application that implements full CRUD operations.
 
 ## 🔗 Links
 
-- **Live Demo Link:**
+- **Live Demo Link:** https://e3prime.github.io/todo_list
 
 ## 🚀 Todo List Showcase
 
@@ -34,8 +34,8 @@ Instead, it utilizes the browser's **Local Storage API** to ensure that users' t
 
 ## 🛠️ Technologies Used
 
-- **Semantic HTML5** for the application structure.
-- **CSS3** for the "Galaxy" theme, utilizing background images, neon glow effects, and keyframe animations for the modal and task transitions.
+- **HTML** for the application structure.
+- **CSS** for the "Galaxy" theme, utilizing background images, neon glow effects, and keyframe animations for the modal and task transitions.
 - **JavaScript(ES6+)** for:
   - Event Delegation (handling clicks on dynamic task lists).
   - `JSON.parse()` and `JSON.stringify()` for local storage management.
